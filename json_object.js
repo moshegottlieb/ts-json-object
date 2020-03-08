@@ -1,0 +1,1 @@
+import './dist/json_object'

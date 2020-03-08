@@ -8,4 +8,3 @@ temp
 dist/
 node_modules/
 config.json
-*.js
