@@ -1,8 +1,8 @@
 {
   "name": "ts-json-object",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "JSON typescript runtime validation",
-  "main": "dist/json_object.js",
+  "main": "src/json_object.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "node_modules/typescript/bin/tsc"
