@@ -2,13 +2,23 @@
 
 JSON object validation for typescript
 
-Quick start:
+### What does it do?
+It saves you the need to validate the JSON objects you receive.  
+Instead of having to verify your fields one by one, and having to verify sub objects for validity, you just need to annonate your properties and your code is automagically type checked and verified.  
+Required JSON fields are verified to exist, and optionals are, well, optionals.
+
+### How does it work?
+
+Using [typescript decorators](https://www.typescriptlang.org/docs/handbook/decorators.html).  
+It also uses [reflect-metadata](https://www.npmjs.com/package/reflect-metadata) because typescript verifies this package is loaded before emitting type information.  
+
+### Quick start
 
 * Add to your `tsconfig.json`:  
 
 ```json
 "experimentalDecorators": true,
-"emitDecoratorMetadata": true
+"emitDecoratorMetadata": true,
 ```
 
 * Define your JSON objects as subclasses of `JSONObject`
@@ -54,10 +64,14 @@ try {
 }
 ```
 
+### I found something, or want to contribute
+
+Cool!  
+Let me know.
+
 ## Notes
 
 * **Important**
 Properties that were not annonated will _not_ be loaded.
 * The annonation code runs when your module is loaded, and the runtime checks run when your object constructor is running
-* 
-
+* Doesn't work on interfaces because typescript decorators don't work on interfaces, classes are required, and must subclass `JSONObject`.
