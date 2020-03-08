@@ -1,0 +1,34 @@
+{
+  "name": "json-object",
+  "version": "0.0.1",
+  "description": "JSON typescript runtime validation",
+  "main": "dist/json_object.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build" : "node_modules/typescript/bin/tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moshegottlieb/json_object.git"
+  },
+  "keywords": [
+    "json",
+    "typescript",
+    "validation",
+    "decorator",
+    "reflection",
+    "metadata"
+  ],
+  "author": "Moshe Gottlieb",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/moshegottlieb/json_object/issues"
+  },
+  "homepage": "https://github.com/moshegottlieb/json_object#readme",
+  "devDependencies": {
+    "typescript": "^3.8.3"
+  },
+  "dependencies": {
+    "reflect-metadata": "^0.1.13"
+  }
+}

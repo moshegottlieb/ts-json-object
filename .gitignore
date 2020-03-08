@@ -1,0 +1,11 @@
+.DS_Store
+Generated
+Package.resolved
+/.build
+/Packages
+/*.xcodeproj
+temp
+dist/
+node_modules/
+config.json
+*.js
