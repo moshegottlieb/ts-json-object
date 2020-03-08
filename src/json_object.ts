@@ -11,7 +11,14 @@ export class JSONObject extends Object{
         if (typeof value == 'object'){
             (<any>this)[key] = new (Reflect.getMetadata("design:type",this,key))(value)
         } else {
-            (<any>this)[key] = Reflect.getMetadata("design:type",this,key)(value)
+            let computed = Reflect.getMetadata("design:type",this,key)(value)
+            let computed_type = typeof computed
+            let value_type = typeof value
+            if (computed_type == value_type){
+                (<any>this)[key] = Reflect.getMetadata("design:type",this,key)(value)
+            } else {
+                throw new TypeError(`${this.constructor.name}.${key} requires type '${computed_type}', got '${value_type}' instead`)
+            }
         }
     }
 
