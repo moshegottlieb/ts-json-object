@@ -55,10 +55,17 @@ try {
 		author: { name: 'A great author' }
 	}) // ok
 		
-	let book_error = new Book({
+	let book_required_error = new Book({
 		name: 'Great Book',
 		title: 'A great author'
-	}) // Will throw a TypeError - Book.author is required
+	}) // Will throw a TypeError - Book.isbn, Book.author are required
+	
+	let book_wrong_type_error = new Book({
+		isbn: 12345,
+		title: 'Great Book',
+		author: { name: 'A great author' }
+	}) // Will throw a TypeError - Book.isbn shoud be a string
+
 } catch (error){
 	console.error(`Error: ${error}`)
 }
