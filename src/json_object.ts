@@ -4,6 +4,7 @@ import 'reflect-metadata'
 let __optional = Symbol('optional')
 let __keys = Symbol('keys')
 let __mapping = Symbol('mapping')
+let __union = Symbol('union')
 
 export class JSONObject extends Object{
 
@@ -11,6 +12,18 @@ export class JSONObject extends Object{
         if (typeof value == 'object'){
             (<any>this)[key] = new (Reflect.getMetadata("design:type",this,key))(value)
         } else {
+            if (Reflect.hasMetadata(__union,this,key)){
+                let values = <Array<any>>(Reflect.getMetadata(__union,this,key))
+                let is_valid = false
+                for (let i=0;i<values.length && !is_valid;++i){
+                    if (values === values[i]){
+                        is_valid = true
+                    }
+                }
+                if (!is_valid){
+                    throw new TypeError(`${this.constructor.name}.${key} requires one of the following values:\n${values}\n, Got ${value} instead`)
+                }
+            }
             let computed = Reflect.getMetadata("design:type",this,key)(value)
             let computed_type = typeof computed
             let value_type = typeof value
@@ -46,6 +59,10 @@ export class JSONObject extends Object{
                 this.set(key,json_value)
             }
         }
+    }
+
+    static union<T>(values:Array<T>){
+        return Reflect.metadata(__mapping,values)
     }
 
     static map(newKey:string){
@@ -85,6 +102,10 @@ export class JSONObject extends Object{
         Reflect.defineMetadata(__optional,true,target,key)
     }
 
+}
+
+export function union<T>(values:Array<T>){
+    return JSONObject.union(values)
 }
 
 export function required(target:any,key:string){
