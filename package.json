@@ -1,6 +1,6 @@
 {
   "name": "ts-json-object",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "JSON typescript runtime validation",
   "main": "dist/index.js",
   "scripts": {
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/moshegottlieb/json_object.git"
+    "url": "git+https://github.com/moshegottlieb/json-object.git"
   },
   "keywords": [
     "json",
@@ -22,9 +22,9 @@
   "author": "Moshe Gottlieb",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/moshegottlieb/json_object/issues"
+    "url": "https://github.com/moshegottlieb/json-object/issues"
   },
-  "homepage": "https://github.com/moshegottlieb/json_object#readme",
+  "homepage": "https://github.com/moshegottlieb/json-object#readme",
   "devDependencies": {
     "typescript": "^3.8.3"
   },
