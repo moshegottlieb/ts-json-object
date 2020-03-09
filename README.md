@@ -174,6 +174,7 @@ Decorator | Description
 `@required` | Marks a property as required
 `@optional` | Marks a property as optional
 `@map(key:string)` | Maps a property to the json `key`
+`@union(values:Array<any>)` | Validates the json key is one of the values specified in the `values` arrays
 `@validate(validator:(object:T,key:string,value:V)=>void)` | Runs a custom validation code on your property
 `@gt(n:number)` | Runs a `greater than` validation on the json value, for example: `@gt(5)` would mean the json value must be greater than 5
 `@gte(n:number)` | Runs a `greater than or equal` validation on the json value
