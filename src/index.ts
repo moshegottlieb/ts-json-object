@@ -1,1 +1,1 @@
-export { JSONObject } from './json_object'
+export { JSONObject, required, optional, map } from './json_object'

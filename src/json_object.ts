@@ -86,3 +86,13 @@ export class JSONObject extends Object{
     }
 
 }
+
+export function required(target:any,key:string){
+    JSONObject.required(target,key)
+}
+export function optional(target:any,key:string){
+    JSONObject.optional(target,key)
+}
+export function map(jsonKey:string){
+    return JSONObject.map(jsonKey)
+}
