@@ -24,6 +24,7 @@ It also uses [reflect-metadata](https://www.npmjs.com/package/reflect-metadata) 
 * Define your JSON objects as subclasses of `JSONObject`
 * Annonate your properties with `@JSONObject.required` or `JSONObject.optional`
 * Optionally change JSON property names to match your model using `JSONObject.map('your-json-name-here')`
+* Add `JSONObject.union(array of valid values)` to support literal union validations
 * Optionally import `required`, `optional` and `map` instead of `JSONObject.xxx` and use the shorter notation (unless this generic names collide with other symbols in your project)
 * Create your objects using a constructor that accepts an object with JSON values
 * Sub objects are supported
