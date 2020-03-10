@@ -143,6 +143,38 @@ class User extends JSONObject {
 ```
 
 
+#### Passthrough
+
+You can also use `@passthrough` to omit built in type checks.  
+In this case, the json value will be stored in your property without verifying it's type (will be considered as `any`).  
+
+```typescript
+import {JSONObject} from 'ts-json-object'
+
+// The value is optional by default
+class Person extends JSONObject {
+	@JSONObject.passthrough
+	info: any
+}
+let p = new Person({ 
+	info: { 
+		anything : goes	
+	}
+})
+
+// You can still specify all constraints, only the type is not checked
+class Person extends JSONObject {
+	@JSONObject.passthrough
+	@JSONObject.required
+	@JSONObject.eq('secret')
+	info: any
+}
+let p = new Person({ info: 'secret' }) // ok
+let p = new Person({ info: 'not so secret' }) // error, @eq will fail
+let p = new Person({}) // error, info is required
+
+```
+
 #### Short notation
 
 It's also possible to use a shorter notation:  
@@ -174,6 +206,7 @@ Decorator | Description
 --- | ---
 `@required` | Marks a property as required
 `@optional` | Marks a property as optional
+`@passthrough` | Skips type checks (optional by default)
 `@map(key:string)` | Maps a property to the json `key`
 `@union(values:Array<any>)` | Validates the json key is one of the values specified in the `values` arrays
 `@validate(validator:(object:T,key:string,value:V)=>void)` | Runs a custom validation code on your property

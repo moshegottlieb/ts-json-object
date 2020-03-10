@@ -12,6 +12,7 @@ let __eq = Symbol('eq')
 let __ne = Symbol('ne')
 let __gte = Symbol('gte')
 let __lte = Symbol('lte')
+let __passthrough = Symbol('passthrough')
 
 type Validator = (object:any,key:string,value:any) => void
 
@@ -34,15 +35,18 @@ export class JSONObject extends Object{
                     throw new TypeError(`${this.constructor.name}.${key} requires one of the following values:[${values}], got '${value}' instead`)
                 }
             }
-            let expected = Reflect.getMetadata("design:type",this,key)(value)
-            let expected_type = typeof expected
-            let value_type = typeof value
-            if (expected_type == value_type){
-                new_value = Reflect.getMetadata("design:type",this,key)(value)
+            if (Reflect.hasMetadata(__passthrough,this,key) && Reflect.getMetadata(__passthrough,this,key) == true){
+                new_value = value
             } else {
-                throw new TypeError(`${this.constructor.name}.${key} requires type '${expected_type}', got '${value_type}' instead`)
+                let expected = Reflect.getMetadata("design:type",this,key)(value)
+                let expected_type = typeof expected
+                let value_type = typeof value
+                if (expected_type == value_type){
+                    new_value = Reflect.getMetadata("design:type",this,key)(value)
+                } else {
+                    throw new TypeError(`${this.constructor.name}.${key} requires type '${expected_type}', got '${value_type}' instead`)
+                }    
             }
-
             let symbols = [__code,__gt,__gte,__eq,__ne,__lt,__lte]
             for (let symbol of symbols){
                 if (Reflect.hasMetadata(symbol,this,key)){
@@ -181,6 +185,12 @@ export class JSONObject extends Object{
         return Reflect.metadata(__ne,validator)
     }
 
+    public static passthrough(target:any,key:string){
+        JSONObject.preprocess(target,key)
+        Reflect.defineMetadata(__passthrough,true,target,key)
+    }
+
+
     public static required(target:any,key:string){
         JSONObject.preprocess(target,key)
         Reflect.defineMetadata(__optional,false,target,key)
@@ -209,6 +219,10 @@ export function optional(target:any,key:string){
 }
 export function map(jsonKey:string){
     return JSONObject.map(jsonKey)
+}
+
+export function passthrough(target:any,key:string){
+    return JSONObject.passthrough(target,key)
 }
 
 export function gt(value:number){
