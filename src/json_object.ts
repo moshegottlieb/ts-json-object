@@ -75,7 +75,7 @@ export class JSONObject extends Object{
             }
             json_value = json[json_key]
             if (json_value === undefined){
-                if (this.get(key) === undefined && !JSONObject.isOptional(this,key)) {
+                if (this.get(key) === undefined && !JSONObject.isOptional(this,key) ) {
                     throw new TypeError(`${this.constructor.name}.${key} is required`)
                 }
             } else {
@@ -97,7 +97,8 @@ export class JSONObject extends Object{
     }
 
     private static isOptional(target:any,key:string){
-        return Reflect.getMetadata(__optional,target,key)
+        let ret = Reflect.getMetadata(__optional,target,key)
+        return ret == true || ret === undefined
     }
 
     private static jsonKeys(target:any){
@@ -105,7 +106,7 @@ export class JSONObject extends Object{
     }
 
     private static preprocess(target:any,key:string){
-        let optional = this.isOptional(target,key)
+        let optional = Reflect.getMetadata(__optional,target,key)
         if (optional !== undefined){
             throw new SyntaxError(`Cannot mark ${target.constructor.name} as required, already set as ${optional ? 'optional' : 'required'}`)
         }
