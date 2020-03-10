@@ -14,6 +14,7 @@ It also uses [reflect-metadata](https://www.npmjs.com/package/reflect-metadata) 
 
 ### Quick start
 
+* Add it to your project - `npm install ts-json-object`
 * Add to your `tsconfig.json`:  
 
 ```json
