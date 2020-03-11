@@ -12,6 +12,7 @@ let __eq = Symbol('eq')
 let __ne = Symbol('ne')
 let __gte = Symbol('gte')
 let __lte = Symbol('lte')
+let __default = Symbol('default')
 let __passthrough = Symbol('passthrough')
 
 type Validator = (object:any,key:string,value:any) => void
@@ -76,6 +77,11 @@ export class JSONObject extends Object{
                 json_key = key
             }
             json_value = json[json_key]
+            // Is there a default?
+            if (json_value === undefined){
+                json_value = Reflect.getMetadata(__default,this,key)
+            }
+            // Still undefined?
             if (json_value === undefined){
                 if (this.get(key) === undefined && !JSONObject.isOptional(this,key) ) {
                     throw new TypeError(`${this.constructor.name}.${key} is required`)
@@ -199,9 +205,18 @@ export class JSONObject extends Object{
         Reflect.defineMetadata(__optional,false,target,key)
     }
 
-    public static optional(target:any,key:string){
-        JSONObject.preprocess(target,key)
-        Reflect.defineMetadata(__optional,true,target,key)
+    public static optional(target:any,key?:string) : void | any{
+        if (key === undefined){
+            let meta = Reflect.metadata(__default,target)
+            let ret = (target:any,key:any)=>{
+                JSONObject.optional(target,key) // Make it optional
+                meta(target,key)
+            }
+            return ret
+        } else {
+            JSONObject.preprocess(target,key)
+            Reflect.defineMetadata(__optional,true,target,key)    
+        }
     }
 
 }
@@ -217,8 +232,12 @@ export function union<T>(values:Array<T>){
 export function required(target:any,key:string){
     JSONObject.required(target,key)
 }
-export function optional(target:any,key:string){
-    JSONObject.optional(target,key)
+export function optional(target:any,key?:string):void | any{
+    if (key === undefined) {
+        return JSONObject.optional(target,key)
+    } else {
+        JSONObject.optional(target,key)
+    }
 }
 export function map(jsonKey:string){
     return JSONObject.map(jsonKey)

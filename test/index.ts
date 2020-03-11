@@ -162,6 +162,16 @@ let test = new Test([
             pages : ['page1','page2']
         }})
         assert.ok(car3.userManual.pages[1] == 'page2')
+    },
+    ()=>{
+        class Car extends JSONObject {
+            @optional(false)
+            electric:boolean
+        }
+        let electric_car = new Car({electric:true})
+        assert.ok(electric_car.electric)
+        let carbon_emitting_car = new Car({})
+        assert.ok(carbon_emitting_car.electric === false)
     }
 ])
 test.run()

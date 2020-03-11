@@ -158,6 +158,24 @@ let p = new Person({}) // error, info is required
 
 ```
 
+#### Default values
+
+Specify a default value by providing a default value to `@JSONObject.optional`
+
+```typescript
+import {JSONObject, optional } from 'ts-json-object'
+
+class Car extends JSONObject {
+	@JSONObject.optional(false)
+	electric:boolean
+}
+let electric_car = new Car({electric:true}) // provide a value
+electric_car.electric == true
+let carbon_emitting_car = new Car({}) // use a default value
+carbon_emitting_car.electric === false
+```
+
+
 #### Short notation
 
 It's also possible to use a shorter notation:  
