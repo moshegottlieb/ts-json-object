@@ -1,8 +1,8 @@
 {
   "name": "ts-json-object",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "JSON typescript runtime validation",
-  "main": "dist/index.js",
+  "main": "dist/src/index.js",
   "scripts": {
     "test": "node dist/test/index.js",
     "build": "node_modules/typescript/bin/tsc"
