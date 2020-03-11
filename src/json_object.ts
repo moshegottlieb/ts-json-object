@@ -54,8 +54,8 @@ export class JSONObject extends Object{
                     code(this,key,new_value)
                 }
             }
-            (<any>this)[key] = new_value
         }
+        (<any>this)[key] = new_value
     }
 
     private get(key:string) : any{

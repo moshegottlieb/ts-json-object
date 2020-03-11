@@ -31,16 +31,31 @@ It also uses [reflect-metadata](https://www.npmjs.com/package/reflect-metadata) 
 ```typescript
 import {JSONObject} from 'ts-json-object'
 
-// Declare your sub objects first, make sure these extends JSONObject as well
+class Book extends JSONObject {
+	@JSONObject.required
+	name:string
+	@JSONObject.optional
+	summary?:string
+}
+
+// This is ok
+let book:Book = new Book({ name: "Moby Dick" , summary: "You're my obsession" })
+// This is also ok
+let b2:Book = new Book({ name: "Moby Dick" }) // Also ok
+// Summary is undefined
+b2.summary === undefined
+// This will throw a TypeError, as 'name' is required
+let book:Book = new Book({ summary: "Once upon a time" })
+// This will throw a TypeError, as 'name' must be a string
+let book:Book = new Book({ name: 12345 } )
+
+//Subobjects are supported
 class Author extends JSONObject {
 	@JSONObject.required
 	name: string
 }
 
-// A book can use the Author type as a property
-class Book {
-	@JSONObject.required
-	isbn:string
+class BookWithAuthor extends JSONObject {
 	@JSONObject.required
 	name:string
 	@JSONObject.optional
@@ -48,40 +63,8 @@ class Book {
 	@JSONObject.required
 	author:Author
 }
-
-
-// Create instances of your class from JSON objects
-
-try {
-	let book = new Book({
-		isbn: '12345',
-		name: 'Great Book',
-		author: { name: 'A great author' }
-	}) // ok
-	
-	let book_summary = new Book({
-		isbn: '12345',
-		name: 'Great Book',
-		author: { name: 'A great author' },
-		summary: 'An optional summary'
-	}) // ok as well
-		
-	let book_required_error = new Book({
-		name: 'Great Book',
-		author:{
-			name: 'A great author'
-		}
-	}) // Will throw a TypeError - Book.isbn is required
-	
-	let book_wrong_type_error = new Book({
-		isbn: 12345,
-		name: 'Great Book',
-		author: { name: 'A great author' }
-	}) // Will throw a TypeError - Book.isbn must be a string
-
-} catch (error){
-	console.error(`Error: ${error}`)
-}
+let book2:BookWithAuthor = new BookWithAuthor({ name: "Moby Dick", author: {name: "Herman Melville" } })
+(book2.author instanceof Author) == true
 ```
 
 #### Mapping JSON keys
