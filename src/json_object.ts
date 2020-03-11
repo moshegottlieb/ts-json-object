@@ -64,6 +64,8 @@ export class JSONObject extends Object{
 
     constructor(json:any){
         super()
+        let json_keys = JSONObject.jsonKeys(this)
+        if (!json_keys) return // no properties defined
         for (let key of JSONObject.jsonKeys(this)){
             let json_value:any
             let json_key:string
