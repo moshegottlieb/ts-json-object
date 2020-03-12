@@ -2,7 +2,7 @@ import {JSONObject, required,optional, union, map, gt, lt , gte, lte, eq, ne, va
 import {strict as assert} from 'assert'
 
 type TestFn = ()=>void
-type Tests = Array<TestFn>
+type Tests = Array<TestFn >
 
 class Test {
     constructor(tests:Tests){
@@ -98,6 +98,28 @@ let test = new Test([
             let p = new Person({id: 6})
         })
         let p = new Person({id: 7})
+    },
+    ()=>{
+        class Person extends JSONObject {
+            @lte(5)
+            id:number
+        }
+        assert.throws(()=>{
+            let p = new Person({id: 6})
+        })
+        let p1 = new Person({id: 5})
+        let p2 = new Person({id: 4})
+    },
+    ()=>{
+        class Person extends JSONObject {
+            @gte(5)
+            id:number
+        }
+        assert.throws(()=>{
+            let p = new Person({id: 4})
+        })
+        let p1 = new Person({id: 5})
+        let p2 = new Person({id: 6})
     },
     ()=>{
         class Person extends JSONObject {

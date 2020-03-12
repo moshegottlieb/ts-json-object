@@ -140,16 +140,25 @@ export class JSONObject extends Object{
         }
     }
 
+    static metadata(symbol:Symbol,value:any){
+        let meta = Reflect.metadata(symbol,value)
+        let ret = (target:any,key:any)=>{
+            JSONObject.preprocess(target,key)
+            meta(target,key)
+        }
+        return ret
+    }
+
     static validate(code:(object:any,key:string,value:any)=>void){
-        return Reflect.metadata(__code,code)
+        return JSONObject.metadata(__code,code)
     }
 
     static union<T>(values:Array<T>){
-        return Reflect.metadata(__union,values)
+        return JSONObject.metadata(__union,values)
     }
 
     static map(newKey:string){
-        return Reflect.metadata(__mapping,newKey)
+        return JSONObject.metadata(__mapping,newKey)
     }
 
     private static isOptional(target:any,key:string){
@@ -181,12 +190,7 @@ export class JSONObject extends Object{
     }
 
     static array(type:Function){
-        let meta = Reflect.metadata(__array,type)
-        let ret = (target:any,key:any)=>{
-            JSONObject.preprocess(target,key)
-            meta(target,key)
-        }
-        return ret
+        return JSONObject.metadata(__array,type)
     }
 
     static integer(target:any,key:string){
@@ -202,7 +206,7 @@ export class JSONObject extends Object{
                 throw new TypeError(`${object.constructor.name}.${key}: ${jsonValue} > ${capture} requirement failed`)
             }
         }
-        return Reflect.metadata(__gt,validator)
+        return JSONObject.metadata(__gt,validator)
     }
 
     public static gte(value:number){
@@ -213,7 +217,7 @@ export class JSONObject extends Object{
                 throw new TypeError(`${object.constructor.name}.${key}: ${jsonValue} >= ${capture} requirement failed`)
             }
         }
-        return Reflect.metadata(__gte,validator)
+        return JSONObject.metadata(__gte,validator)
     }
     public static lt(value:number){
         let capture = value
@@ -223,7 +227,7 @@ export class JSONObject extends Object{
                 throw new TypeError(`${object.constructor.name}.${key}: ${jsonValue} < ${capture} requirement failed`)
             }
         }
-        return Reflect.metadata(__lt,validator)
+        return JSONObject.metadata(__lt,validator)
     }
     public static lte(value:number){
         let capture = value
@@ -233,7 +237,7 @@ export class JSONObject extends Object{
                 throw new TypeError(`${object.constructor.name}.${key}: ${jsonValue} <= ${capture} requirement failed`)
             }
         }
-        return Reflect.metadata(__lte,validator)
+        return JSONObject.metadata(__lte,validator)
     }
     public static eq(value:any){
         let capture = value
@@ -242,7 +246,7 @@ export class JSONObject extends Object{
                 throw new TypeError(`${object.constructor.name}.${key}: ${jsonValue} == ${capture} requirement failed`)
             }
         }
-        return Reflect.metadata(__eq,validator)
+        return JSONObject.metadata(__eq,validator)
     }
     public static ne(value:any){
         let capture = value
@@ -251,7 +255,7 @@ export class JSONObject extends Object{
                 throw new TypeError(`${object.constructor.name}.${key}: ${jsonValue} != ${capture} requirement failed`)
             }
         }
-        return Reflect.metadata(__ne,validator)
+        return JSONObject.metadata(__ne,validator)
     }
 
     public static passthrough(target:any,key:string){
