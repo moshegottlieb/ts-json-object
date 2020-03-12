@@ -14,46 +14,91 @@ let __gte = Symbol('gte')
 let __lte = Symbol('lte')
 let __default = Symbol('default')
 let __passthrough = Symbol('passthrough')
+let __integer = Symbol('integer')
+let __generic = Symbol('generic')
+let __array = Symbol('array')
 
 type Validator = (object:any,key:string,value:any) => void
 
 export class JSONObject extends Object{
 
+
+    private newValue(value:any,design_type:any,key:string){
+        if (typeof value == 'object'){
+            if (Array.isArray(value)){
+                let array_meta = Reflect.hasMetadata(__array,this,key) ? Reflect.getMetadata(__array,this,key) : null
+                if (array_meta && value.length){
+                    let ret = Array()
+                    for (let i=0;i<value.length;++i){
+                        let e = value[i]
+                        let new_e:any
+                        if (typeof e == 'object'){
+                            if (Array.isArray(e)){ // (at least) 2 dim array, throw an unsupported error
+                                throw new TypeError(`${this.constructor.name}.${key}: array type cannot be array, consider using @passthrough and @validate`)
+                            }
+                            new_e = new array_meta(e)
+                        } else {
+                            new_e = array_meta(e)
+                        }
+                        let expected_type = typeof e
+                        let value_type = typeof new_e
+                        if (expected_type != value_type){
+                            throw new TypeError(`${this.constructor.name}.${key} array element requires type '${expected_type}', got '${value_type}' instead`)
+                        }
+                        ret.push(new_e)
+                    }
+                    return ret
+                } else {
+                    return value
+                }
+                
+            } else {
+                return new design_type(value)
+            }
+        } else {
+            return design_type(value)
+        }            
+    }
+
     private set(key:string,value:any){
         let new_value:any
-        if (typeof value == 'object'){
-            new_value = new (Reflect.getMetadata("design:type",this,key))(value)
+        let design_type = Reflect.getMetadata("design:type",this,key)
+        if (Reflect.hasMetadata(__union,this,key)){
+            let values = <Array<any>>(Reflect.getMetadata(__union,this,key))
+            let is_valid = false
+            for (let i=0;i<values.length && !is_valid;++i){
+                if (value === values[i]){
+                    is_valid = true
+                }
+            }
+            if (!is_valid){
+                throw new TypeError(`${this.constructor.name}.${key} requires one of the following values:[${values}], got '${value}' instead`)
+            }
+        }
+        if (Reflect.hasMetadata(__passthrough,this,key) && Reflect.getMetadata(__passthrough,this,key) == true){
+            new_value = value
         } else {
-            if (Reflect.hasMetadata(__union,this,key)){
-                let values = <Array<any>>(Reflect.getMetadata(__union,this,key))
-                let is_valid = false
-                for (let i=0;i<values.length && !is_valid;++i){
-                    if (value === values[i]){
-                        is_valid = true
-                    }
-                }
-                if (!is_valid){
-                    throw new TypeError(`${this.constructor.name}.${key} requires one of the following values:[${values}], got '${value}' instead`)
-                }
+            new_value = this.newValue(value,design_type,key)
+            let expected_type = typeof new_value
+            let value_type = typeof value
+            if (expected_type != value_type){
+                throw new TypeError(`${this.constructor.name}.${key} requires type '${expected_type}', got '${value_type}' instead`)
+            }    
+        }
+        let symbols = [__code,__gt,__gte,__eq,__ne,__lt,__lte]
+        for (let symbol of symbols){
+            if (Reflect.hasMetadata(symbol,this,key)){
+                let code = <Validator>(Reflect.getMetadata(symbol,this,key))
+                code(this,key,new_value)
             }
-            if (Reflect.hasMetadata(__passthrough,this,key) && Reflect.getMetadata(__passthrough,this,key) == true){
-                new_value = value
-            } else {
-                let expected = Reflect.getMetadata("design:type",this,key)(value)
-                let expected_type = typeof expected
-                let value_type = typeof value
-                if (expected_type == value_type){
-                    new_value = Reflect.getMetadata("design:type",this,key)(value)
-                } else {
-                    throw new TypeError(`${this.constructor.name}.${key} requires type '${expected_type}', got '${value_type}' instead`)
-                }    
+        }
+        if (Reflect.hasMetadata(__integer,this,key)){
+            const type = typeof new_value
+            if (type != 'number'){
+                throw new TypeError(`${this.constructor.name}.${key} @integer requires a numeric type, got ${type} instead`)
             }
-            let symbols = [__code,__gt,__gte,__eq,__ne,__lt,__lte]
-            for (let symbol of symbols){
-                if (Reflect.hasMetadata(symbol,this,key)){
-                    let code = <Validator>(Reflect.getMetadata(symbol,this,key))
-                    code(this,key,new_value)
-                }
+            if (new_value != Math.floor(new_value)){
+                throw new TypeError(`${this.constructor.name}.${key} should be an integer value, got ${new_value} instead`)
             }
         }
         (<any>this)[key] = new_value
@@ -63,8 +108,11 @@ export class JSONObject extends Object{
         return (<any>this)[key]
     }
 
-    constructor(json:any){
+    constructor(json?:any){
         super()
+        if (json === undefined){
+            json = {}
+        }
         let json_keys = JSONObject.jsonKeys(this)
         if (!json_keys) return // no properties defined
         for (let key of JSONObject.jsonKeys(this)){
@@ -114,10 +162,6 @@ export class JSONObject extends Object{
     }
 
     private static preprocess(target:any,key:string){
-        let optional = Reflect.getMetadata(__optional,target,key)
-        if (optional !== undefined){
-            throw new SyntaxError(`Cannot mark ${target.constructor.name} as required, already set as ${optional ? 'optional' : 'required'}`)
-        }
         let keys:Array<string>
         if (Reflect.hasMetadata(__keys,target)){
             keys = Reflect.getMetadata(__keys,target)
@@ -125,13 +169,29 @@ export class JSONObject extends Object{
             keys = Array<string>()
             Reflect.defineMetadata(__keys,keys,target)
         }
-        keys.push(key)
+        if (!keys.length || keys[keys.length - 1] != key){
+            keys.push(key)    
+        }
     }
 
     private validateNumeric(key:string,value:any){
         if (typeof value !== 'number'){
             throw new TypeError(`${this.constructor.name}.${key}: requires numeric type for comparison operators`)
         }
+    }
+
+    static array(type:Function){
+        let meta = Reflect.metadata(__array,type)
+        let ret = (target:any,key:any)=>{
+            JSONObject.preprocess(target,key)
+            meta(target,key)
+        }
+        return ret
+    }
+
+    static integer(target:any,key:string){
+        JSONObject.preprocess(target,key)
+        Reflect.defineMetadata(__integer,true,target,key)
     }
 
     public static gt(value:number){
@@ -247,6 +307,10 @@ export function passthrough(target:any,key:string){
     return JSONObject.passthrough(target,key)
 }
 
+export function integer(target:any,key:string){
+    return JSONObject.integer(target,key)
+}
+
 export function gt(value:number){
     return JSONObject.gt(value)
 }
@@ -264,4 +328,7 @@ export function eq(value:any){
 }
 export function ne(value:any){
     return JSONObject.ne(value)
+}
+export function array(value:any){
+    return JSONObject.array(value)
 }

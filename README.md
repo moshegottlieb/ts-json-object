@@ -176,6 +176,30 @@ carbon_emitting_car.electric === false
 ```
 
 
+#### Arrays
+
+Arrays aren't really supprted by typescript type information.  
+However, we would not be very helpful if arrays weren't supported, right?  
+The `@JSONObject.array(type)` decorator is here to help!  
+
+```typescript
+class Element extends JSONObject {
+	@optional
+	x?:number
+}
+class ArrayTest extends JSONObject {
+    @required
+    @array(Element)
+    a:Array<Element>
+}
+let json = {a:[{x:2},{}]}
+let arrayTest = new ArrayTest(json)
+arrayTest.a[0] instanceof Element
+arrayTest.a[0].x == 2
+arrayTest.a[1].x === undefined
+arrayTest.a.length == 2
+```
+
 #### Short notation
 
 It's also possible to use a shorter notation:  
@@ -207,10 +231,13 @@ Decorator | Description
 --- | ---
 `@required` | Marks a property as required
 `@optional` | Marks a property as optional
+`@optional(value)` | Marks a property as optional and sets a default value
 `@passthrough` | Skips type checks (optional by default)
 `@map(key:string)` | Maps a property to the json `key`
 `@union(values:Array<any>)` | Validates the json key is one of the values specified in the `values` arrays
+`@array(Type)` | Specify the type of the array element (optional by default)
 `@validate(validator:(object:T,key:string,value:V)=>void)` | Runs a custom validation code on your property
+`@integer` | Validates the value is an integer and not a floating point value, implies @optional
 `@gt(n:number)` | Runs a `greater than` validation on the json value, for example: `@gt(5)` would mean the json value must be greater than 5
 `@gte(n:number)` | Runs a `greater than or equal` validation on the json value
 `@lt(n:number)` | Runs a `less than` validation on the json value
@@ -226,6 +253,21 @@ Decorator | Description
 @ne(8)
 @lte(10)
 value:number // number is validated as between 5 to 10 (inclusive) but not 8
+```
+
+#### Limitations
+
+**Generics are not supported**
+
+Unfortunately, typescript doesn't pass the correct runtime information for generics.  
+
+```typescript
+class Generic<T> extends JSONObject {
+        @required
+        value:T
+}
+// Won't work as typescript will always pass `Object` as the type information for T, no matter how we generalize it
+let g:Generic<number> = new Generic({value:8})
 ```
 
 ### I found something, or want to contribute

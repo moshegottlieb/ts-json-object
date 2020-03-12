@@ -1,4 +1,4 @@
-import {JSONObject, required,optional, union, map, gt, lt , gte, lte, eq, ne, validate, passthrough } from '../src/index'
+import {JSONObject, required,optional, union, map, gt, lt , gte, lte, eq, ne, validate, passthrough, integer, array } from '../src/index'
 import {strict as assert} from 'assert'
 
 type TestFn = ()=>void
@@ -172,6 +172,46 @@ let test = new Test([
         assert.ok(electric_car.electric)
         let carbon_emitting_car = new Car({})
         assert.ok(carbon_emitting_car.electric === false)
+    },
+    ()=>{
+        class Int extends JSONObject {
+            @required
+            @integer
+            value:number
+        }
+        let i = new Int({ value: 13 })
+        assert.throws(()=>{
+            let i = new Int({ value: 13.4 })
+        })
+    },
+    ()=>{
+        class Element extends JSONObject {
+            @optional
+            x?:number
+        }
+        class ArrayTest extends JSONObject {
+            @required
+            @array(Element)
+            a:Array<Element>
+        }
+        let json = {a:[{x:2},{}]}
+        let arrayTest = new ArrayTest(json)
+        assert.ok(arrayTest.a[0] instanceof Element)
+        assert.ok(arrayTest.a[0].x == 2)
+        assert.ok(arrayTest.a[1].x === undefined)
+        assert.ok(arrayTest.a.length == 2)
+    },
+    ()=>{
+        // Simply type
+        class ArrayTest extends JSONObject {
+            @required
+            a:Array<any>
+        }
+        let json = {a:[{x:2},{}]}
+        let arrayTest = new ArrayTest(json)
+        assert.ok(arrayTest.a[0].x == 2)
+        assert.ok(arrayTest.a[1].x === undefined)
+        assert.ok(arrayTest.a.length == 2)
     }
 ])
 test.run()
