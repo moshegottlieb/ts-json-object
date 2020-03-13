@@ -83,6 +83,7 @@ class Book extends JSONObject {
 }
 
 let book = new Book({ name : 'A great title!' })
+book.title == 'A great title!' // mapped from 'name'
 
 ```
 
@@ -120,7 +121,7 @@ class User extends JSONObject {
     @JSONObject.required
     age: number
     @JSONObject.required
-	name:string
+    name:string
 }
 
 let user1 = new User({ specie : 'Homo Sapiens', age: 28, name: 'Bob' })
@@ -168,9 +169,9 @@ class User extends JSONObject {
 	@JSONObject.validate( (user:User,key:string,value:string) => {
 		// the user object already has the properties defined before this key ('name', in our case)
 		const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-       if (!re.test(value)){
-       	throw new TypeError(`User.${key} - invalid email address for user: ${user.name}`)
-       }
+		if (!re.test(value)){
+			throw new TypeError(`User.${key} - invalid email address for user: ${user.name}`)
+		}
 	})
 	@JSONObject.required
 	email: string
@@ -192,11 +193,8 @@ class Person extends JSONObject {
 	@JSONObject.passthrough
 	info: any
 }
-let p = new Person({ 
-	info: { 
-		anything : goes	
-	}
-})
+
+let p = new Person({ info: { anything : goes }})
 
 // You can still specify all constraints, only the type is not checked
 class Person extends JSONObject {
