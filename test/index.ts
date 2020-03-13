@@ -1,4 +1,4 @@
-import {JSONObject, required,optional, union, map, gt, lt , gte, lte, eq, ne, validate, passthrough, integer, array } from '../src/index'
+import {JSONObject, required,optional, union, map, gt, lt , gte, lte, eq, ne, validate, custom, passthrough, integer, array } from '../src/index'
 import {strict as assert} from 'assert'
 
 type TestFn = ()=>(void | Promise<void>)
@@ -207,6 +207,55 @@ let test = new Test([
             let p = new Person({ id: 7 })
         })
     }},
+    {
+        name:'custom',
+        run:()=>{
+            class User extends JSONObject {
+                @required
+                specie:string
+                @custom( (user:User,key:string,value:number) => {
+                    // Translate to dog years if needed, using previously defiend values
+                    return (user.specie == 'Canine')? value*7 : value
+                    // Note that user.name is not yet defined!
+                })
+                @required
+                age: number
+                @required
+                name:string
+            }
+            
+            let user1 = new User({ specie : 'Homo Sapiens', age: 28, name: 'Bob' })
+            assert.ok(user1.age == 28)
+            let user2 = new User({ specie : 'Canine', age: 4, name: 'Fido' })
+            assert.ok(user2.age == 28)
+        }
+    },
+    {
+        name: 'custom assign',
+        run:()=>{
+            class User extends JSONObject {
+                @required
+                specie:string
+                @custom( (user:User,key:string,value:number) => {
+                    // Translate to dog years if needed, using previously defiend values
+                    user.realAge = (user.specie == 'Canine')? value*7 : value
+                    return value
+                })
+                @required
+                age: number
+                realAge:number // No notation, do not assign this property from the json object
+                @required
+                name:string
+            }
+            
+            let user1 = new User({ specie : 'Homo Sapiens', age: 28, name: 'Bob' })
+            assert.ok(user1.age == 28)
+            assert.ok(user1.realAge == 28)
+            let user2 = new User({ specie : 'Canine', age: 4, name: 'Fido' })
+            assert.ok(user2.age == 4)
+            assert.ok(user2.realAge == 28)
+        }
+    },
     {
         name:'union',
         run:()=>{

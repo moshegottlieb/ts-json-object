@@ -101,6 +101,61 @@ class Book extends JSONObject {
 
 ```
 
+#### Custom assignment
+
+Sometimes you need to mutate the json values a bit, possibly based on other values.  
+Use `@custom` for that
+
+```typescript
+import {JSONObject} from 'ts-json-object'
+
+class User extends JSONObject {
+    @JSONObject.required
+    specie:string
+    @JSONObject.custom( (user:User,key:string,value:number) => {
+        // Translate to dog years if needed, using previously defiend values
+        return (user.specie == 'Canine')? value*7 : value
+        // Note that user.name is not yet defined!
+    })
+    @JSONObject.required
+    age: number
+    @JSONObject.required
+	name:string
+}
+
+let user1 = new User({ specie : 'Homo Sapiens', age: 28, name: 'Bob' })
+user1.age == 28
+let user2 = new User({ specie : 'Canine', age: 4, name: 'Fido' })
+user2.age == 28
+```
+
+An even nicer trick would be to add a calculated value:
+
+```typescript
+import {JSONObject} from 'ts-json-object'
+
+class User extends JSONObject {
+    @JSONObject.required
+    specie:string
+    @JSONObject.custom( (user:User,key:string,value:number) => {
+        // Translate to dog years if needed, using previously defiend values
+        user.realAge = (user.specie == 'Canine')? value*7 : value
+        return value
+    })
+    @JSONObject.required
+    age: number
+    realAge:number // No notation, do not assign this property from the json object
+    @JSONObject.required
+	name:string
+}
+
+let user1 = new User({ specie : 'Homo Sapiens', age: 28, name: 'Bob' })
+user1.realAge == 28
+let user2 = new User({ specie : 'Canine', age: 4, name: 'Fido' })
+user2.realAge == 28
+```
+
+
 #### Custom validation
 
 What if you need your own custom validation?   
@@ -110,8 +165,6 @@ Wouldn't it be easier to use a decorator for that?
 import {JSONObject} from 'ts-json-object'
 
 class User extends JSONObject {
-	@JSONObject.required
-	name: string
 	@JSONObject.validate( (user:User,key:string,value:string) => {
 		// the user object already has the properties defined before this key ('name', in our case)
 		const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -236,6 +289,7 @@ Decorator | Description
 `@map(key:string)` | Maps a property to the json `key`
 `@union(values:Array<any>)` | Validates the json key is one of the values specified in the `values` arrays
 `@array(Type)` | Specify the type of the array element (optional by default)
+`@custom(code:(object:T,key:string,value:V)=>V)` | Runs a custom code segment and allows custom manipulation on the JSON value
 `@validate(validator:(object:T,key:string,value:V)=>void)` | Runs a custom validation code on your property
 `@integer` | Validates the value is an integer and not a floating point value, implies @optional
 `@gt(n:number)` | Runs a `greater than` validation on the json value, for example: `@gt(5)` would mean the json value must be greater than 5

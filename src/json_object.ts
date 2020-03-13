@@ -15,10 +15,10 @@ let __lte = Symbol('lte')
 let __default = Symbol('default')
 let __passthrough = Symbol('passthrough')
 let __integer = Symbol('integer')
-let __generic = Symbol('generic')
 let __array = Symbol('array')
+let __custom = Symbol('custom')
 
-type Validator = (object:any,key:string,value:any) => void
+type Validator = (object:any,key:string,value:any) => void | any
 
 export class JSONObject extends Object{
 
@@ -85,6 +85,13 @@ export class JSONObject extends Object{
                 throw new TypeError(`${this.constructor.name}.${key} requires type '${expected_type}', got '${value_type}' instead`)
             }    
         }
+        // Run custom assignment if exists
+        if (Reflect.hasMetadata(__custom,this,key)){
+            let code = <Validator>(Reflect.getMetadata(__custom,this,key))
+            let ret = code(this,key,new_value)
+            if (ret !== undefined) new_value = ret
+        }
+        // Run validations if exists
         let symbols = [__code,__gt,__gte,__eq,__ne,__lt,__lte]
         for (let symbol of symbols){
             if (Reflect.hasMetadata(symbol,this,key)){
@@ -92,11 +99,9 @@ export class JSONObject extends Object{
                 code(this,key,new_value)
             }
         }
+        // Run integer validator
         if (Reflect.hasMetadata(__integer,this,key)){
-            const type = typeof new_value
-            if (type != 'number'){
-                throw new TypeError(`${this.constructor.name}.${key} @integer requires a numeric type, got ${type} instead`)
-            }
+            this.validateNumeric(key,new_value)
             if (new_value != Math.floor(new_value)){
                 throw new TypeError(`${this.constructor.name}.${key} should be an integer value, got ${new_value} instead`)
             }
@@ -149,6 +154,10 @@ export class JSONObject extends Object{
         return ret
     }
 
+    static custom(code:(object:any,key:string,value:any)=>any){
+        return JSONObject.metadata(__custom,code)
+    }
+
     static validate(code:(object:any,key:string,value:any)=>void){
         return JSONObject.metadata(__code,code)
     }
@@ -185,7 +194,7 @@ export class JSONObject extends Object{
 
     private validateNumeric(key:string,value:any){
         if (typeof value !== 'number'){
-            throw new TypeError(`${this.constructor.name}.${key}: requires numeric type for comparison operators`)
+            throw new TypeError(`${this.constructor.name}.${key}: requires numeric type for validation operators`)
         }
     }
 
@@ -287,6 +296,10 @@ export class JSONObject extends Object{
 
 export function validate(code:(object:any,key:string,value:any)=>void){
     return JSONObject.validate(code)
+}
+
+export function custom(code:(object:any,key:string,value:any)=>any){
+    return JSONObject.custom(code)
 }
 
 export function union<T>(values:Array<T>){
