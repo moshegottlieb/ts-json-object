@@ -1,6 +1,6 @@
-test/
-src/
-dist/test
+./test/
+./src/
+./dist/test
 node_modules/
 .gitignore
 .package-lock.json
