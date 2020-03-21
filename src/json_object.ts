@@ -20,6 +20,8 @@ let __custom = Symbol('custom')
 
 type Validator = (object:any,key:string,value:any) => void | any
 
+export class JSONTypeError extends TypeError {}
+
 export class JSONObject extends Object{
 
 
@@ -34,7 +36,7 @@ export class JSONObject extends Object{
                         let new_e:any
                         if (typeof e == 'object'){
                             if (Array.isArray(e)){ // (at least) 2 dim array, throw an unsupported error
-                                throw new TypeError(`${this.constructor.name}.${key}: array type cannot be array, consider using @passthrough and @validate`)
+                                throw new JSONTypeError(`${this.constructor.name}.${key}: array type cannot be array, consider using @passthrough and @validate`)
                             }
                             new_e = new array_meta(e)
                         } else {
@@ -43,7 +45,7 @@ export class JSONObject extends Object{
                         let expected_type = typeof e
                         let value_type = typeof new_e
                         if (expected_type != value_type){
-                            throw new TypeError(`${this.constructor.name}.${key} array element requires type '${expected_type}', got '${value_type}' instead`)
+                            throw new JSONTypeError(`${this.constructor.name}.${key} array element requires type '${expected_type}', got '${value_type}' instead`)
                         }
                         ret.push(new_e)
                     }
@@ -72,7 +74,7 @@ export class JSONObject extends Object{
                 }
             }
             if (!is_valid){
-                throw new TypeError(`${this.constructor.name}.${key} requires one of the following values:[${values}], got '${value}' instead`)
+                throw new JSONTypeError(`${this.constructor.name}.${key} requires one of the following values:[${values}], got '${value}' instead`)
             }
         }
         if (Reflect.hasMetadata(__passthrough,this,key) && Reflect.getMetadata(__passthrough,this,key) == true){
@@ -82,7 +84,7 @@ export class JSONObject extends Object{
             let expected_type = typeof new_value
             let value_type = typeof value
             if (expected_type != value_type){
-                throw new TypeError(`${this.constructor.name}.${key} requires type '${expected_type}', got '${value_type}' instead`)
+                throw new JSONTypeError(`${this.constructor.name}.${key} requires type '${expected_type}', got '${value_type}' instead`)
             }    
         }
         // Run custom assignment if exists
@@ -103,7 +105,7 @@ export class JSONObject extends Object{
         if (Reflect.hasMetadata(__integer,this,key)){
             this.validateNumeric(key,new_value)
             if (new_value != Math.floor(new_value)){
-                throw new TypeError(`${this.constructor.name}.${key} should be an integer value, got ${new_value} instead`)
+                throw new JSONTypeError(`${this.constructor.name}.${key} should be an integer value, got ${new_value} instead`)
             }
         }
         (<any>this)[key] = new_value
@@ -137,7 +139,7 @@ export class JSONObject extends Object{
             // Still undefined?
             if (json_value === undefined){
                 if (this.get(key) === undefined && !JSONObject.isOptional(this,key) ) {
-                    throw new TypeError(`${this.constructor.name}.${key} is required`)
+                    throw new JSONTypeError(`${this.constructor.name}.${key} is required`)
                 }
             } else {
                 this.set(key,json_value)
@@ -194,7 +196,7 @@ export class JSONObject extends Object{
 
     private validateNumeric(key:string,value:any){
         if (typeof value !== 'number'){
-            throw new TypeError(`${this.constructor.name}.${key}: requires numeric type for validation operators`)
+            throw new JSONTypeError(`${this.constructor.name}.${key}: requires numeric type for validation operators`)
         }
     }
 
@@ -212,7 +214,7 @@ export class JSONObject extends Object{
         let validator = function (object:JSONObject,key:string,jsonValue:any) : void {
             object.validateNumeric(key,jsonValue)
             if (!(jsonValue > capture)){
-                throw new TypeError(`${object.constructor.name}.${key}: ${jsonValue} > ${capture} requirement failed`)
+                throw new JSONTypeError(`${object.constructor.name}.${key}: ${jsonValue} > ${capture} requirement failed`)
             }
         }
         return JSONObject.metadata(__gt,validator)
@@ -223,7 +225,7 @@ export class JSONObject extends Object{
         let validator = function (object:JSONObject,key:string,jsonValue:any) : void {
             object.validateNumeric(key,jsonValue)
             if (!(jsonValue >= capture)){
-                throw new TypeError(`${object.constructor.name}.${key}: ${jsonValue} >= ${capture} requirement failed`)
+                throw new JSONTypeError(`${object.constructor.name}.${key}: ${jsonValue} >= ${capture} requirement failed`)
             }
         }
         return JSONObject.metadata(__gte,validator)
@@ -233,7 +235,7 @@ export class JSONObject extends Object{
         let validator = function (object:JSONObject,key:string,jsonValue:any) : void {
             object.validateNumeric(key,jsonValue)
             if (!(jsonValue < capture)){
-                throw new TypeError(`${object.constructor.name}.${key}: ${jsonValue} < ${capture} requirement failed`)
+                throw new JSONTypeError(`${object.constructor.name}.${key}: ${jsonValue} < ${capture} requirement failed`)
             }
         }
         return JSONObject.metadata(__lt,validator)
@@ -243,7 +245,7 @@ export class JSONObject extends Object{
         let validator = function (object:JSONObject,key:string,jsonValue:any) : void {
             object.validateNumeric(key,jsonValue)
             if (!(jsonValue <= capture)){
-                throw new TypeError(`${object.constructor.name}.${key}: ${jsonValue} <= ${capture} requirement failed`)
+                throw new JSONTypeError(`${object.constructor.name}.${key}: ${jsonValue} <= ${capture} requirement failed`)
             }
         }
         return JSONObject.metadata(__lte,validator)
@@ -252,7 +254,7 @@ export class JSONObject extends Object{
         let capture = value
         let validator = function (object:JSONObject,key:string,jsonValue:any) : void {
             if (!(jsonValue == capture)){
-                throw new TypeError(`${object.constructor.name}.${key}: ${jsonValue} == ${capture} requirement failed`)
+                throw new JSONTypeError(`${object.constructor.name}.${key}: ${jsonValue} == ${capture} requirement failed`)
             }
         }
         return JSONObject.metadata(__eq,validator)
@@ -261,7 +263,7 @@ export class JSONObject extends Object{
         let capture = value
         let validator = function (object:JSONObject,key:string,jsonValue:any) : void {
             if (!(jsonValue != capture)){
-                throw new TypeError(`${object.constructor.name}.${key}: ${jsonValue} != ${capture} requirement failed`)
+                throw new JSONTypeError(`${object.constructor.name}.${key}: ${jsonValue} != ${capture} requirement failed`)
             }
         }
         return JSONObject.metadata(__ne,validator)
