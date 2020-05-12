@@ -1,3 +1,5 @@
+![Node.js CI](https://github.com/moshegottlieb/ts-json-object/workflows/Node.js%20CI/badge.svg)
+
 # `ts-json-object`
 
 JSON object validation for typescript
