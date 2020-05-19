@@ -134,7 +134,7 @@ export class JSONObject extends Object{
         }
         let json_keys = JSONObject.jsonKeys(this)
         if (!json_keys) return // no properties defined
-        for (let key of JSONObject.jsonKeys(this)){
+        for (let key of json_keys){
             let json_value:any
             let json_key:string
             // Is there a mapping this value?
@@ -190,16 +190,24 @@ export class JSONObject extends Object{
     }
 
     private static jsonKeys(target:any){
-        return Reflect.getMetadata(__keys,target)
+        let ret = Array<string>()
+        // Get the keys, all the way to the base class
+        while (target = target.__proto__){
+            let i = Reflect.getMetadata(__keys,target,target.constructor.name)
+            if (i){
+                ret = ret.concat(i)
+            }
+        }
+        return ret
     }
 
     private static preprocess(target:any,key:string){
         let keys:Array<string>
-        if (Reflect.hasMetadata(__keys,target)){
-            keys = Reflect.getMetadata(__keys,target)
+        if (Reflect.hasMetadata(__keys,target,target.constructor.name)){
+            keys = Reflect.getMetadata(__keys,target,target.constructor.name)
         } else {
             keys = Array<string>()
-            Reflect.defineMetadata(__keys,keys,target)
+            Reflect.defineMetadata(__keys,keys,target,target.constructor.name)
         }
         if (!keys.length || keys[keys.length - 1] != key){
             keys.push(key)    

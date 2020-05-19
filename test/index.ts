@@ -392,8 +392,15 @@ let test = new Test([
             a:number
         }
         class Sub extends Base {
+            x:number
             @required
             b:number
+        }
+        class Sub2 extends Base {
+            @required
+            a2:number
+            @map('x')
+            b:string
         }
         let s = new Sub({a:1, b:2})
         assert.ok(s.a == 1)
