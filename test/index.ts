@@ -382,6 +382,33 @@ let test = new Test([
         assert.ok(arrayTest.a[0].x == 2)
         assert.ok(arrayTest.a[1].x === undefined)
         assert.ok(arrayTest.a.length == 2)
-    }}
+    }},
+    {
+        name:'inheritance',
+        run:()=>{
+        // Simply type
+        class Base extends JSONObject {
+            @required
+            a:number
+        }
+        class Sub extends Base {
+            @required
+            b:number
+        }
+        let s = new Sub({a:1, b:2})
+        assert.ok(s.a == 1)
+        assert.ok(s.b == 2)
+    }},
+    {
+        name:'Date',
+        run:()=>{
+        // Simply type
+        class DateTest extends JSONObject {
+            @required
+            date:Date
+        }
+        let test = new DateTest({date:1})
+        assert.ok(Date.prototype.isPrototypeOf(test.date))
+    }},
 ])
 test.run()

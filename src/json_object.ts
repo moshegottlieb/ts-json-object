@@ -57,6 +57,8 @@ export class JSONObject extends Object{
             } else {
                 return new design_type(value)
             }
+        } else if (design_type.name == 'Date'){
+            return new design_type(value)
         } else {
             return design_type(value)
         }            
@@ -81,11 +83,18 @@ export class JSONObject extends Object{
             new_value = value
         } else {
             new_value = this.newValue(value,design_type,key)
-            let expected_type = typeof new_value
-            let value_type = typeof value
-            if (expected_type != value_type){
-                throw new JSONTypeError(`${this.constructor.name}.${key} requires type '${expected_type}', got '${value_type}' instead`)
-            }    
+            // If not date
+            if (design_type.name == 'Date'){
+                if (!Date.prototype.isPrototypeOf(new_value)){
+                    throw new JSONTypeError(`${this.constructor.name}.${key} requires a type that can be converted to a date, got '${typeof value}' instead`)
+                }
+            } else {
+                let expected_type = typeof new_value
+                let value_type = typeof value
+                if (expected_type != value_type){
+                    throw new JSONTypeError(`${this.constructor.name}.${key} requires type '${expected_type}', got '${value_type}' instead`)
+                }
+            }
         }
         // Run custom assignment if exists
         if (Reflect.hasMetadata(__custom,this,key)){
