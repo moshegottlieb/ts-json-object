@@ -85,8 +85,11 @@ export class JSONObject extends Object{
             new_value = this.newValue(value,design_type,key)
             // If not date
             if (design_type.name == 'Date'){
-                if (!Date.prototype.isPrototypeOf(new_value)){
+                if (typeof new_value !== 'object' || typeof new_value.getTime !== 'function'){
                     throw new JSONTypeError(`${this.constructor.name}.${key} requires a type that can be converted to a date, got '${typeof value}' instead`)
+                }
+                if (isNaN(new_value.getTime())){
+                    throw new JSONTypeError(`${this.constructor.name}.${key} requires a type that can be converted to a date, got '${typeof value}(${value})' instead`)
                 }
             } else {
                 let expected_type = typeof new_value

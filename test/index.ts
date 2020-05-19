@@ -409,6 +409,9 @@ let test = new Test([
         }
         let test = new DateTest({date:1})
         assert.ok(Date.prototype.isPrototypeOf(test.date))
+        assert.throws(()=>{
+            let test = new DateTest({date: 'not going to work'})
+        })
     }},
 ])
 test.run()
