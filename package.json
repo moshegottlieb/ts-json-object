@@ -26,8 +26,8 @@
   },
   "homepage": "https://github.com/moshegottlieb/ts-json-object#readme",
   "devDependencies": {
-    "@types/node": "^13.13.6",
-    "typescript": "^3.9.2"
+    "@types/node": "^13.13.8",
+    "typescript": "^3.9.3"
   },
   "dependencies": {
     "reflect-metadata": "^0.1.13"
