@@ -337,7 +337,7 @@ Let me know.
 * **Important**
   * Properties that were not annonated will _not_ be loaded.
   * If you plan to use `--strictPropertyInitialization` or set it in your `tsconfig.json` file, make sure you add the ts linter annonations: `// @ts-ignore` to your properties, as typescript does not know how your properties are initialized - otherwise you'd see the compilation error:
-`Property 'propertyNameHere' has no initializer and is not definitely assigned in the constructor.  TS2564`
+`Property 'propertyNameHere' has no initializer and is not definitely assigned in the constructor.  TS2564`  
 Typescript doesn't have built in support for this.  
 This is similar to **swift**'s built in codable support - which doesn't exist in typescript, unfortunately.
   * The annonation code runs when your module is loaded, and the runtime checks run when your object constructor is running
