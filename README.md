@@ -331,7 +331,14 @@ Let me know.
 
 ## Notes
 
+* **Known issues**
+  * It looks like there's an [issue](../../issues/2) with **react** apps built with something like `npx create-react-app my-app --typescript`
+
 * **Important**
-Properties that were not annonated will _not_ be loaded.
-* The annonation code runs when your module is loaded, and the runtime checks run when your object constructor is running
-* Doesn't work on interfaces because typescript decorators don't work on interfaces, classes are required, and must subclass `JSONObject`.
+  * Properties that were not annonated will _not_ be loaded.
+  * If you plan to use `--strictPropertyInitialization` or set it in your `tsconfig.json` file, make sure you add the ts linter annonations: `// @ts-ignore` to your properties, as typescript does not know how your properties are initialized - otherwise you'd see the compilation error:
+`Property 'propertyNameHere' has no initializer and is not definitely assigned in the constructor.  TS2564`
+Typescript doesn't have built in support for this.  
+This is similar to **swift**'s built in codable support - which doesn't exist in typescript, unfortunately.
+  * The annonation code runs when your module is loaded, and the runtime checks run when your object constructor is running
+  * Doesn't work on interfaces because typescript decorators don't work on interfaces, classes are required, and must subclass `JSONObject`.
