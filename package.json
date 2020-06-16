@@ -1,6 +1,6 @@
 {
   "name": "ts-json-object",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "description": "JSON typescript runtime validation",
   "main": "dist/src/index.js",
   "scripts": {
@@ -26,8 +26,8 @@
   },
   "homepage": "https://github.com/moshegottlieb/ts-json-object#readme",
   "devDependencies": {
-    "@types/node": "^13.13.8",
-    "typescript": "^3.9.3"
+    "@types/node": "^13.13.12",
+    "typescript": "^3.9.5"
   },
   "dependencies": {
     "reflect-metadata": "^0.1.13"

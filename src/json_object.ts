@@ -57,6 +57,7 @@ export class JSONObject extends Object{
             } else {
                 return new design_type(value)
             }
+            //
         } else if (design_type.name == 'Date'){
             return new design_type(value)
         } else {
@@ -67,6 +68,9 @@ export class JSONObject extends Object{
     private set(key:string,value:any){
         let new_value:any
         let design_type = Reflect.getMetadata("design:type",this,key)
+        if (design_type === undefined){
+            throw new Error("Meta data not defined")
+        }
         if (Reflect.hasMetadata(__union,this,key)){
             let values = <Array<any>>(Reflect.getMetadata(__union,this,key))
             let is_valid = false
@@ -82,44 +86,45 @@ export class JSONObject extends Object{
         if (Reflect.hasMetadata(__passthrough,this,key) && Reflect.getMetadata(__passthrough,this,key) == true){
             new_value = value
         } else {
-            new_value = this.newValue(value,design_type,key)
-            // If not date
-            if (design_type.name == 'Date'){
-                if (typeof new_value !== 'object' || typeof new_value.getTime !== 'function'){
-                    throw new JSONTypeError(`${this.constructor.name}.${key} requires a type that can be converted to a date, got '${typeof value}' instead`)
-                }
-                if (isNaN(new_value.getTime())){
-                    throw new JSONTypeError(`${this.constructor.name}.${key} requires a type that can be converted to a date, got '${typeof value}(${value})' instead`)
-                }
+            // Run custom assignment if exists
+            if (Reflect.hasMetadata(__custom,this,key)){
+                let code = <Validator>(Reflect.getMetadata(__custom,this,key))
+                let ret = code(this,key,value)
+                if (ret !== undefined) new_value = ret
             } else {
-                let expected_type = typeof new_value
-                let value_type = typeof value
-                if (expected_type != value_type){
-                    throw new JSONTypeError(`${this.constructor.name}.${key} requires type '${expected_type}', got '${value_type}' instead`)
+                new_value = this.newValue(value,design_type,key)
+                // If not date
+                if (design_type.name == 'Date'){
+                    if (typeof new_value !== 'object' || typeof new_value.getTime !== 'function'){
+                        throw new JSONTypeError(`${this.constructor.name}.${key} requires a type that can be converted to a date, got '${typeof value}' instead`)
+                    }
+                    if (isNaN(new_value.getTime())){
+                        throw new JSONTypeError(`${this.constructor.name}.${key} requires a type that can be converted to a date, got '${typeof value}(${value})' instead`)
+                    }
+                } else {
+                    let expected_type = typeof new_value
+                    let value_type = typeof value
+                    if (expected_type != value_type){
+                        throw new JSONTypeError(`${this.constructor.name}.${key} requires type '${expected_type}', got '${value_type}' instead`)
+                    }
+                } 
+                // Run validations if exists
+                let symbols = [__code,__gt,__gte,__eq,__ne,__lt,__lte]
+                for (let symbol of symbols){
+                    if (Reflect.hasMetadata(symbol,this,key)){
+                        let code = <Validator>(Reflect.getMetadata(symbol,this,key))
+                        code(this,key,new_value)
+                    }
+                }
+                // Run integer validator
+                if (Reflect.hasMetadata(__integer,this,key)){
+                    this.validateNumeric(key,new_value)
+                    if (new_value != Math.floor(new_value)){
+                        throw new JSONTypeError(`${this.constructor.name}.${key} should be an integer value, got ${new_value} instead`)
+                    }
                 }
             }
-        }
-        // Run custom assignment if exists
-        if (Reflect.hasMetadata(__custom,this,key)){
-            let code = <Validator>(Reflect.getMetadata(__custom,this,key))
-            let ret = code(this,key,new_value)
-            if (ret !== undefined) new_value = ret
-        }
-        // Run validations if exists
-        let symbols = [__code,__gt,__gte,__eq,__ne,__lt,__lte]
-        for (let symbol of symbols){
-            if (Reflect.hasMetadata(symbol,this,key)){
-                let code = <Validator>(Reflect.getMetadata(symbol,this,key))
-                code(this,key,new_value)
-            }
-        }
-        // Run integer validator
-        if (Reflect.hasMetadata(__integer,this,key)){
-            this.validateNumeric(key,new_value)
-            if (new_value != Math.floor(new_value)){
-                throw new JSONTypeError(`${this.constructor.name}.${key} should be an integer value, got ${new_value} instead`)
-            }
-        }
+        }        
         (<any>this)[key] = new_value
     }
 
