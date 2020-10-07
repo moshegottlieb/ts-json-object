@@ -150,14 +150,19 @@ export class JSONObject extends Object{
             }
             json_value = json[json_key]
             // Is there a default?
-            if (json_value === undefined){
-                json_value = Reflect.getMetadata(__default,this,key)
+            if (json_value === undefined || json_value === null){
+                let default_json_value = Reflect.getMetadata(__default,this,key)
+                // Only set default value if it's there, otherwise leave the value null or undefiend (there's a difference between the two)
+                if (default_json_value !== undefined){
+                    json_value = default_json_value
+                }
             }
             // Still undefined?
-            if (json_value === undefined){
+            if (json_value === undefined || json_value === null){
                 if (this.get(key) === undefined && !JSONObject.isOptional(this,key) ) {
                     throw new JSONTypeError(`${this.constructor.name}.${key} is required`)
                 }
+                (<any>this)[key] = json_value // undefined or null, exactly as specified (or not specified :-) )
             } else {
                 this.set(key,json_value)
             }

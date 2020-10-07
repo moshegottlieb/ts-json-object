@@ -53,6 +53,19 @@ class Test {
 
 let test = new Test([
     {
+        name: 'null, undefined',
+        run:()=>{
+            class Nullable extends JSONObject {
+                @optional
+                value?:string;
+            }
+            let n_null = new Nullable({ value:null })
+            assert.ok(n_null.value === null)
+            let n_undefiend = new Nullable({})
+            assert.ok(n_undefiend.value === undefined)
+        }
+    },
+    {
         name:'required',
         run:()=>{
             class Book extends JSONObject {
