@@ -234,6 +234,8 @@ carbon_emitting_car.electric === false
 Arrays aren't really supprted by typescript type information.  
 However, we would not be very helpful if arrays weren't supported, right?  
 The `@JSONObject.array(type)` decorator is here to help!  
+If you need an array of `string`, `boolean` or other primitieves, use the wrapper objects for these types:  
+For string, use `String` etc.
 
 ```typescript
 class Element extends JSONObject {
@@ -244,13 +246,20 @@ class ArrayTest extends JSONObject {
     @required
     @array(Element)
     a:Array<Element>
+    @optional
+    @array(String)
+    b:String[]
 }
-let json = {a:[{x:2},{}]}
+let json = {a:[{x:2},{}], b:['Fox','Cat']}
 let arrayTest = new ArrayTest(json)
 arrayTest.a[0] instanceof Element
 arrayTest.a[0].x == 2
 arrayTest.a[1].x === undefined
 arrayTest.a.length == 2
+arrayTest.b.length == 2
+arrayTest.b[0] == 'Fox'
+const str = arrayTest.b[1].toString() // str is now a standard `string`
+str == 'Cat'
 ```
 
 #### Short notation
