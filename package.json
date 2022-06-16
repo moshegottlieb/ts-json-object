@@ -1,6 +1,6 @@
 {
   "name": "ts-json-object",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "JSON typescript runtime validation",
   "main": "dist/src/index.js",
   "scripts": {
