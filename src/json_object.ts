@@ -28,7 +28,7 @@ export class JSONObject extends Object{
     private newValue(value:any,design_type:any,key:string){
         if (typeof value == 'object'){
             if (Array.isArray(value) || design_type === Array){
-                const _value = Array.isArray(value) ? value : new design_type(value);
+                let _value = Array.isArray(value) ? value : new design_type(value)
                 let array_meta = Reflect.hasMetadata(__array,this,key) ? Reflect.getMetadata(__array,this,key) : null
                 if (array_meta && _value.length){
                     let ret = Array()
