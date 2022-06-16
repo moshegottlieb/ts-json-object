@@ -397,6 +397,53 @@ let test = new Test([
         assert.ok(arrayTest.a.length == 2)
     }},
     {
+        // Thanks @ste2425!
+        // See https://github.com/moshegottlieb/ts-json-object/issues/4
+        name:'array_object_value',
+        run:()=>{
+        // Simply type
+        class ArrayTest extends JSONObject {
+            @optional
+            a:Array<any>
+        }
+        let json = {a:{}} // object instead of array
+        assert.throws(()=>{
+            const arrayTest = new ArrayTest(json)
+        })
+    }},
+    {
+        // Thanks @ste2425!
+        // See https://github.com/moshegottlieb/ts-json-object/issues/4
+        // This test makes sure we didn't break anything while fixing #4
+        name:'array_object_value_null',
+        run:()=>{
+        // Simply type
+        class ArrayTest extends JSONObject {
+            @optional
+            a:Array<any>
+        }
+        let json = { a : <any>null } 
+        const arrayTest1 = new ArrayTest(json)
+        json = { a : <any>undefined } 
+        const arrayTest2 = new ArrayTest(json)
+    }},
+    {
+        // Thanks @ste2425!
+        // See https://github.com/moshegottlieb/ts-json-object/issues/4
+        // This test makes sure we didn't break anything while fixing #4
+        name:'array_object_value_required',
+        run:()=>{
+        // Simply type
+        class ArrayTest extends JSONObject {
+            @required
+            a:Array<any>
+        }
+        let json = {} 
+        assert.throws(()=>{
+            const arrayTest = new ArrayTest(json)
+        })
+    }},
+    {
         name:'inheritance',
         run:()=>{
         // Simply type
