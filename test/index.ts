@@ -383,6 +383,25 @@ let test = new Test([
         assert.ok(arrayTest.a.length == 2)
     }},
     {
+        // Handle edge case where object only values were converted to Arrays but then did not
+        // have validation run against them
+        name:'array_object_only_value',
+        run:()=>{
+            class Element extends JSONObject {
+                @required
+                y:string
+            }
+            class ArrayTest extends JSONObject {
+                @array(Element)
+                a:Array<Element>
+            }
+            let json = {a:{}}
+            assert.throws(()=>{
+                let at = new ArrayTest(json)
+            })
+        }
+    },
+    {
         name:'array_passthrough',
         run:()=>{
         // Simply type

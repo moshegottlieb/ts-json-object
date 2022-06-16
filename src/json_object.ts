@@ -27,12 +27,13 @@ export class JSONObject extends Object{
 
     private newValue(value:any,design_type:any,key:string){
         if (typeof value == 'object'){
-            if (Array.isArray(value)){
+            if (Array.isArray(value) || design_type === Array){
+                const _value = Array.isArray(value) ? value : new design_type(value);
                 let array_meta = Reflect.hasMetadata(__array,this,key) ? Reflect.getMetadata(__array,this,key) : null
-                if (array_meta && value.length){
+                if (array_meta && _value.length){
                     let ret = Array()
-                    for (let i=0;i<value.length;++i){
-                        let e = value[i]
+                    for (let i=0;i<_value.length;++i){
+                        let e = _value[i]
                         let new_e:any
                         if (typeof e == 'object'){
                             if (Array.isArray(e)){ // (at least) 2 dim array, throw an unsupported error
