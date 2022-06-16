@@ -55,7 +55,7 @@ export class JSONObject extends Object{
                 }
                 
             } else if (design_type.name == 'Array'){
-                if (value !== null ){
+                if (value != null ){
                     throw new JSONTypeError(`${this.constructor.name}.${key}: expected array type, got '${typeof value}' instead`)
                 }
             } else {
