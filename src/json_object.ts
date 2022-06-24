@@ -17,6 +17,8 @@ let __passthrough = Symbol('passthrough')
 let __integer = Symbol('integer')
 let __array = Symbol('array')
 let __custom = Symbol('custom')
+let __minLength = Symbol('minLength')
+let __maxLength = Symbol('maxLength')
 
 type Validator = (object:any,key:string,value:any) => void | any
 
@@ -113,7 +115,7 @@ export class JSONObject extends Object{
                     }
                 } 
                 // Run validations if exists
-                let symbols = [__code,__gt,__gte,__eq,__ne,__lt,__lte]
+                let symbols = [__code,__gt,__gte,__eq,__ne,__lt,__lte,__minLength,__maxLength]
                 for (let symbol of symbols){
                     if (Reflect.hasMetadata(symbol,this,key)){
                         let code = <Validator>(Reflect.getMetadata(symbol,this,key))
@@ -328,6 +330,26 @@ export class JSONObject extends Object{
         }
     }
 
+    public static minLength(value:number){
+        let capture = value
+        let validator = function (object:JSONObject,key:string,jsonValue:any) : void {
+            if (jsonValue.length < value){
+                throw new JSONTypeError(`${object.constructor.name}.${key}: ${jsonValue}.length >= ${capture} requirement failed`)
+            }
+        }
+        return JSONObject.metadata(__minLength,validator)
+    }
+
+    public static maxLength(value:number){
+        let capture = value
+        let validator = function (object:JSONObject,key:string,jsonValue:any) : void {
+            if (jsonValue.length > value){
+                throw new JSONTypeError(`${object.constructor.name}.${key}: ${jsonValue}.length <= ${capture} requirement failed`)
+            }
+        }
+        return JSONObject.metadata(__maxLength,validator)
+    }
+
 }
 
 export function validate(code:(object:any,key:string,value:any)=>void){
@@ -384,4 +406,12 @@ export function ne(value:any){
 }
 export function array(value:any){
     return JSONObject.array(value)
+}
+
+export function maxLength(value:any){
+    return JSONObject.maxLength(value)
+}
+
+export function minLength(value:any){
+    return JSONObject.minLength(value)
 }

@@ -307,6 +307,8 @@ Decorator | Description
 `@lte(n:number)` | Runs a `less than or equal` validation on the json value
 `@eq(v:any)` | Runs a `equal to` validation on the json value (does not require a numeric type)
 `@ne(v:any)` | Runs a `not equal to` validation on the json value (does not require a numeric type)
+`@minLength(v:number)` | Runs a check for a minimum length of a string or array (or anything that has `.length`)
+`@maxLength(v:number)` | Runs a check for a maximum length of a string or array (or anything that has `.length`)
 
 * It is possible to mix comparison operators, the following example will create a range and exclude a single value
 

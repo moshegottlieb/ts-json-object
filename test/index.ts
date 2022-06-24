@@ -1,4 +1,4 @@
-import {JSONObject, required,optional, union, map, gt, lt , gte, lte, eq, ne, validate, custom, passthrough, integer, array } from '../src/index'
+import {JSONObject, required,optional, union, map, gt, lt , gte, lte, eq, ne, validate, custom, passthrough, integer, array, minLength, maxLength } from '../src/index'
 import {strict as assert} from 'assert'
 
 type TestFn = ()=>(void | Promise<void>)
@@ -206,6 +206,88 @@ let test = new Test([
         assert.ok(p.id == 10)
     }},
     {
+        name:'minLength',
+        run:()=>{
+        class Person extends JSONObject {
+            @minLength(5)
+            name:string
+        }
+        let p:Person
+        assert.throws(()=>{            
+            p = new Person({name: '1234'})
+        })
+        p = new Person({name: '12345'})
+        assert.ok(p.name == '12345')
+        p = new Person({})
+        assert.ok(p.name == undefined)
+        p = new Person({name: '1234567890'})
+        assert.ok(p.name == '1234567890')
+        // Test length of arrays
+        class ArrayTest extends JSONObject {
+            @minLength(2)
+            @array(String)
+            test:string[]
+        }
+        let a:ArrayTest
+        assert.throws(()=>{            
+            a = new ArrayTest({
+                test: ['1']
+            })
+        })
+        a = new ArrayTest({
+            test: ['a','b']
+        })
+        a = new ArrayTest({})
+        assert.ok(a.test == undefined)
+        a = new ArrayTest({
+            test: [
+                '1','2','3','4'
+            ]
+        })
+        assert.ok(a.test[3] == '4')
+    }},
+    {
+        name:'maxLength',
+        run:()=>{
+        class Person extends JSONObject {
+            @maxLength(5)
+            name:string
+        }
+        let p:Person
+        assert.throws(()=>{            
+            p = new Person({name: '123456'})
+        })
+        p = new Person({name: '12345'})
+        assert.ok(p.name == '12345')
+        p = new Person({})
+        assert.ok(p.name == undefined)
+        p = new Person({name: '1234'})
+        assert.ok(p.name == '1234')
+        // test length of arrays
+        class ArrayTest extends JSONObject {
+            @maxLength(2)
+            @array(String)
+            test:string[]
+        }
+        let a:ArrayTest
+        assert.throws(()=>{            
+            a = new ArrayTest({
+                test: ['1','2','3']
+            })
+        })
+        a = new ArrayTest({
+            test: ['a','b']
+        })
+        a = new ArrayTest({})
+        assert.ok(a.test == undefined)
+        a = new ArrayTest({
+            test: [
+                '1'
+            ]
+        })
+        assert.ok(a.test[0] == '1')
+    }},
+    {
         name:'validate',
         run:()=>{
         class Person extends JSONObject {
@@ -351,9 +433,9 @@ let test = new Test([
         run:()=>{
         class SimpleArrayTest extends JSONObject {
             @array(String)
-            strings:[string]
+            strings:string[]
             @array(Number)
-            numbers:[number]
+            numbers:number[]
         }
         let sa1 = new SimpleArrayTest({ strings: ['a','b','c']})
         assert.throws(()=>{
