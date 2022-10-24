@@ -42,7 +42,7 @@ class Test {
                 }
                 process.stdout.write(`${OK}OK`)
             } catch (error){
-                process.stdout.write(`${FAIL}FAILED`)
+                process.stdout.write(`${FAIL}FAILED\n${error}`)
             } finally {
                 process.stdout.write(`${CLEAR}\n`)
             }
@@ -562,5 +562,45 @@ let test = new Test([
             let test = new DateTest({date: 'not going to work'})
         })
     }},
+    {
+        name:'Recursive',
+        run:()=>{
+
+            class Node extends JSONObject {
+                @required
+                public name: string
+                @map('relation')
+                @custom((node:Node,key:string,value:object)=>{
+                    return new Relation(value)
+                })
+                private _relation? : object
+                public get relation() : Relation {
+                    return this._relation as Relation
+                }
+            }
+
+            class Relation extends JSONObject{
+                @required
+                public type: string
+                @required
+                public node: Node
+            }
+            const inner_name = 'TestName'
+            let json = {
+                type:'test',
+                node:{
+                    name:'name of node',
+                    relation : {
+                        type: 'test2',
+                        node : {
+                            name: inner_name
+                        }
+                    }
+                }
+            }
+            let test = new Relation(json)
+            assert.ok(test.node.relation.node.name == inner_name)
+        }
+    }
 ])
 test.run()
